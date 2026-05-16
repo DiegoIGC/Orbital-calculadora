@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Orbital ADD">
+<title>Orbital ADD · Calculadora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #0a0e1a;
+  --bg-panel: #11172a;
+  --bg-elevated: #1a2138;
+  --bg-input: #0d1424;
+  --border: #1f2a44;
+  --cyan: #00d4ff;
+  --cyan-soft: rgba(0, 212, 255, 0.1);
+  --cyan-glow: rgba(0, 212, 255, 0.4);
+  --green: #00ff9d;
+  --green-soft: rgba(0, 255, 157, 0.1);
+  --red: #ff3860;
+  --red-soft: rgba(255, 56, 96, 0.1);
+  --yellow: #ffcc00;
+  --orange: #ff9500;
+  --purple: #b66dff;
+  --text: #e8edf5;
+  --text-muted: #7a8499;
+  --text-dim: #4a5366;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  background: var(--bg-deep); color: var(--text);
+  font-family: 'Montserrat', sans-serif; min-height: 100vh;
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(0,212,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,.03) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; top: -50%; right: -20%; width: 80%; height: 80%;
+  background: radial-gradient(circle, var(--cyan-soft) 0%, transparent 60%); pointer-events: none; z-index: 0;
+}
+.app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 24px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.logo {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--cyan), #0099cc);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 20px; color: var(--bg-deep);
+  box-shadow: 0 0 30px var(--cyan-glow); position: relative;
+}
+.logo::after { content: ''; position: absolute; inset: -2px; border-radius: 14px; border: 1px solid var(--cyan); opacity: .4; }
+.brand-text h1 { font-weight: 800; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; }
+.brand-text p { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.header-actions { display: flex; gap: 8px; }
+.btn-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--bg-panel); border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-size: 18px; transition: all .2s;
+}
+.btn-icon:active { background: var(--cyan-soft); border-color: var(--cyan); color: var(--cyan); }
+.package-selector {
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 6px; margin-bottom: 20px; display: flex; gap: 4px; position: relative; overflow: hidden;
+}
+.package-selector::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--cyan); }
+.pkg-btn {
+  flex: 1; padding: 14px 16px; background: transparent; border: none;
+  color: var(--text-muted); font-family: 'Montserrat', sans-serif;
+  font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: 12px; transition: all .2s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.pkg-btn .pkg-name { font-weight: 800; font-size: 13px; }
+.pkg-btn .pkg-model { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+.pkg-btn.active { background: linear-gradient(135deg, var(--cyan), #0099cc); color: var(--bg-deep); box-shadow: 0 4px 14px var(--cyan-glow); }
+.pkg-btn.active .pkg-model { color: rgba(10,14,26,.7); }
+.pkg-btn.profesional.active { background: linear-gradient(135deg, var(--purple), #7b3fff); box-shadow: 0 4px 14px rgba(182,109,255,.4); }
+.pkg-btn.custom.active { background: linear-gradient(135deg, var(--orange), #ff6b00); box-shadow: 0 4px 14px rgba(255,149,0,.4); }
+.tabs {
+  display: flex; gap: 4px; background: var(--bg-panel);
+  padding: 6px; border-radius: 14px; border: 1px solid var(--border);
+  margin-bottom: 28px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.tab {
+  flex: 1; min-width: 100px; padding: 12px 18px; background: transparent; border: none;
+  color: var(--text-muted); font-family: 'Montserrat', sans-serif;
+  font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: 10px; transition: all .2s; white-space: nowrap;
+}
+.tab.active { background: linear-gradient(135deg, var(--cyan), #0099cc); color: var(--bg-deep); font-weight: 700; box-shadow: 0 4px 14px var(--cyan-glow); }
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.section {
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px;
+  padding: 24px; margin-bottom: 20px; position: relative; overflow: hidden;
+}
+.section::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--cyan); }
+.section h2 { font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--cyan); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.section h2 .icon { font-size: 18px; }
+.input-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); gap: 16px; }
+.input-row:last-child { border-bottom: none; }
+.input-label { flex: 1; font-size: 14px; color: var(--text); }
+.input-label .hint { display: block; font-size: 11px; color: var(--text-dim); margin-top: 2px; font-weight: 400; }
+.input-field { position: relative; width: 140px; }
+.input-field input {
+  width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; color: var(--cyan); font-family: 'JetBrains Mono', monospace;
+  font-weight: 600; font-size: 15px; text-align: right; transition: all .2s; -webkit-appearance: none;
+}
+.input-field input:focus { outline: none; border-color: var(--cyan); background: var(--bg-elevated); box-shadow: 0 0 0 3px var(--cyan-soft); }
+.input-field .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 13px; pointer-events: none; }
+.input-field.with-prefix input { padding-left: 26px; }
+.input-field select {
+  width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; color: var(--cyan); font-family: 'Montserrat', sans-serif;
+  font-weight: 600; font-size: 13px; -webkit-appearance: none; text-align: right; cursor: pointer;
+}
+.toggle-group { display: flex; gap: 4px; background: var(--bg-input); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
+.toggle-btn { flex: 1; padding: 8px 14px; background: transparent; border: none; color: var(--text-muted); font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 12px; border-radius: 7px; cursor: pointer; transition: all .2s; }
+.toggle-btn.active { background: var(--cyan); color: var(--bg-deep); }
+.comp-list { margin-top: 12px; }
+.comp-item { display: grid; grid-template-columns: 1fr 110px 36px; gap: 8px; padding: 10px 0; align-items: center; border-bottom: 1px solid var(--border); }
+.comp-item input[type="text"] {
+  background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px; color: var(--text); font-family: 'Montserrat', sans-serif; font-size: 13px; width: 100%;
+}
+.comp-item .input-field { width: 100%; }
+.comp-item input[type="text"]:focus, .comp-item .input-field input:focus { outline: none; border-color: var(--cyan); }
+.btn-delete { width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border); color: var(--red); cursor: pointer; font-size: 14px; }
+.btn-delete:active { background: var(--red-soft); }
+.btn-add {
+  width: 100%; margin-top: 12px; padding: 12px; background: var(--cyan-soft);
+  border: 1px dashed var(--cyan); border-radius: 10px; color: var(--cyan);
+  font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+}
+.zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.zone-card {
+  background: var(--bg-input); border: 2px solid var(--border); border-radius: 12px;
+  padding: 14px; cursor: pointer; transition: all .2s; text-align: center;
+}
+.zone-card.active { border-color: var(--cyan); background: var(--cyan-soft); }
+.zone-card .zone-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.zone-card .zone-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 18px; color: var(--cyan); }
+.zone-card .zone-name { font-size: 11px; color: var(--text); margin-top: 4px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.kpi-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; }
+.kpi-card.highlight { background: linear-gradient(135deg, var(--bg-panel), var(--bg-elevated)); border-color: var(--cyan); }
+.kpi-card.highlight::before { content: ''; position: absolute; top: 0; right: 0; width: 80px; height: 80px; background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%); pointer-events: none; }
+.kpi-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 600; }
+.kpi-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 26px; color: var(--text); line-height: 1; }
+.kpi-value.positive { color: var(--green); }
+.kpi-value.negative { color: var(--red); }
+.kpi-value.accent { color: var(--cyan); }
+.kpi-sub { font-size: 11px; color: var(--text-dim); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+.pl-table { width: 100%; border-collapse: collapse; }
+.pl-table tr { border-bottom: 1px solid var(--border); }
+.pl-table tr:last-child { border-bottom: none; }
+.pl-table td { padding: 14px 8px; font-size: 13px; }
+.pl-table td:first-child { color: var(--text); }
+.pl-table td:nth-child(2), .pl-table td:nth-child(3) { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--cyan); }
+.pl-table td:nth-child(2) { color: var(--text-muted); }
+.pl-table td:nth-child(3) { color: var(--cyan); }
+.pl-table tr.pl-header-row td { font-weight: 700; color: var(--text-dim); text-transform: uppercase; font-size: 10px; letter-spacing: 1.5px; padding: 6px 8px; border-bottom: 1px solid var(--cyan); }
+.pl-table tr.pl-header-row td:nth-child(2), .pl-table tr.pl-header-row td:nth-child(3) { color: var(--cyan); }
+.pl-table tr.section-row td { font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 10px; letter-spacing: 1.5px; padding-top: 18px; padding-bottom: 8px; }
+.pl-table tr.total-row td { font-weight: 700; color: var(--text); font-size: 15px; padding-top: 16px; padding-bottom: 16px; background: var(--bg-elevated); }
+.pl-table tr.total-row td:nth-child(3) { color: var(--green); font-size: 17px; }
+.pl-table tr.subtotal-row td { font-weight: 600; color: var(--text); }
+
+/* Botón info pequeño dentro de filas P&L */
+.pl-info-btn {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer;
+  font-family: 'Times New Roman', serif; font-style: italic;
+  font-weight: 700; font-size: 11px; line-height: 1;
+  transition: all .2s; padding: 0;
+}
+.pl-info-btn:active, .pl-info-btn:hover { background: var(--cyan-soft); border-color: var(--cyan); color: var(--cyan); }
+.sens-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+.sens-table th { background: var(--bg-elevated); padding: 12px 10px; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; text-align: right; font-weight: 600; }
+.sens-table th:first-child { text-align: left; border-radius: 8px 0 0 8px; }
+.sens-table th:last-child { border-radius: 0 8px 8px 0; }
+.sens-table td { padding: 12px 10px; font-size: 13px; font-family: 'JetBrains Mono', monospace; text-align: right; border-bottom: 1px solid var(--border); }
+.sens-table td:first-child { text-align: left; color: var(--text); font-weight: 600; }
+.sens-table tr.current { background: var(--cyan-soft); }
+.sens-table tr.current td { color: var(--cyan); font-weight: 700; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--bg-panel); border: 1px solid var(--cyan); border-radius: 16px; padding: 28px; max-width: 480px; width: 100%; }
+.modal h3 { font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; }
+.modal p { font-size: 14px; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn { padding: 12px 20px; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: 1px solid var(--border); background: var(--bg-panel); color: var(--text); }
+.btn.primary { background: linear-gradient(135deg, var(--cyan), #0099cc); color: var(--bg-deep); border-color: var(--cyan); font-weight: 700; }
+.btn:active { transform: scale(.97); }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg-elevated); border: 1px solid var(--cyan); color: var(--cyan); padding: 14px 22px; border-radius: 12px; font-weight: 600; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; opacity: 0; transition: all .3s; z-index: 200; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.footer { text-align: center; margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.footer span { color: var(--cyan); }
+.stat-callout { background: linear-gradient(135deg, var(--cyan-soft), transparent); border: 1px solid var(--cyan); border-radius: 12px; padding: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; }
+.stat-callout .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.stat-callout .value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; color: var(--cyan); }
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.status-badge.good { background: var(--green-soft); color: var(--green); border: 1px solid var(--green); }
+.status-badge.warn { background: rgba(255,204,0,.1); color: var(--yellow); border: 1px solid var(--yellow); }
+.status-badge.bad { background: var(--red-soft); color: var(--red); border: 1px solid var(--red); }
+.cons-item { display: grid; grid-template-columns: 1fr 100px 100px 100px 36px; gap: 8px; padding: 10px 0; align-items: center; border-bottom: 1px solid var(--border); }
+.cons-item input { background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; padding: 8px; color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: 13px; text-align: right; width: 100%; }
+.cons-item input[type="text"] { text-align: left; color: var(--text); font-family: 'Montserrat', sans-serif; }
+.cons-header { display: grid; grid-template-columns: 1fr 100px 100px 100px 36px; gap: 8px; padding: 8px 0; font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.cons-header div:not(:first-child) { text-align: right; }
+.pkg-tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.pkg-tag.estandar { background: var(--cyan-soft); color: var(--cyan); border: 1px solid var(--cyan); }
+.pkg-tag.profesional { background: rgba(182,109,255,.1); color: var(--purple); border: 1px solid var(--purple); }
+.pkg-tag.custom { background: rgba(255,149,0,.1); color: var(--orange); border: 1px solid var(--orange); }
+
+/* Botón Info en KPIs */
+.kpi-card { position: relative; }
+.btn-info {
+  position: absolute; top: 12px; right: 12px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  color: var(--text-muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Times New Roman', serif; font-style: italic;
+  font-weight: 700; font-size: 13px;
+  transition: all .2s; z-index: 5;
+}
+.btn-info:active, .btn-info:hover { background: var(--cyan-soft); border-color: var(--cyan); color: var(--cyan); }
+
+/* KPI agrupados por sección */
+.kpi-section-title {
+  font-size: 11px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 2px; font-weight: 700;
+  margin-top: 24px; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.kpi-section-title::before {
+  content: ''; width: 4px; height: 14px; background: var(--cyan); border-radius: 2px;
+}
+.kpi-section-title.purple::before { background: var(--purple); }
+.kpi-section-title.orange::before { background: var(--orange); }
+
+/* Modal de información (explicación de fórmula) */
+.info-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.8); backdrop-filter: blur(10px);
+  z-index: 300; justify-content: center; align-items: center; padding: 20px;
+}
+.info-modal.active { display: flex; }
+.info-modal-content {
+  background: var(--bg-panel); border: 1px solid var(--cyan);
+  border-radius: 16px; padding: 28px; max-width: 560px; width: 100%;
+  max-height: 85vh; overflow-y: auto;
+}
+.info-modal-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px; gap: 12px;
+}
+.info-modal-title {
+  font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--cyan); font-weight: 700; flex: 1;
+}
+.info-modal-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  color: var(--text); cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.info-modal-close:active { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+.info-section { margin-bottom: 18px; }
+.info-section h4 {
+  font-size: 10px; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px;
+}
+.info-section p {
+  font-size: 14px; color: var(--text); line-height: 1.6;
+}
+.info-formula {
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  color: var(--cyan); margin-top: 6px; overflow-x: auto;
+}
+.info-formula .op { color: var(--text-muted); margin: 0 4px; }
+.info-formula .result { color: var(--green); font-weight: 700; }
+.info-formula.text-formula {
+  white-space: normal; color: var(--text); line-height: 1.8;
+}
+.info-formula.text-formula .var { color: var(--cyan); font-weight: 700; }
+.info-formula.text-formula .op { color: var(--text-muted); }
+.info-formula.text-formula .result { color: var(--green); font-weight: 700; }
+.fiscal-shared { background: linear-gradient(135deg, rgba(255,204,0,.05), transparent); border: 1px solid rgba(255,204,0,.3); }
+.fiscal-shared::before { background: var(--yellow) !important; }
+.shared-tag { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(255,204,0,.1); color: var(--yellow); border: 1px solid var(--yellow); }
+.compare-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.compare-card.estandar { border-left: 3px solid var(--cyan); }
+.compare-card.profesional { border-left: 3px solid var(--purple); }
+.compare-card.custom { border-left: 3px solid var(--orange); }
+.compare-card h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+.compare-card.estandar h4 { color: var(--cyan); }
+.compare-card.profesional h4 { color: var(--purple); }
+.compare-card.custom h4 { color: var(--orange); }
+.compare-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+.compare-row:last-child { border-bottom: none; }
+.compare-row .v { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--text); }
+@media (max-width: 1024px) { .input-field { width: 130px; } .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) {
+  .app { padding: 16px; }
+  .header { flex-direction: column; align-items: flex-start; }
+  .input-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .input-field { width: 100%; }
+  .zone-grid { grid-template-columns: 1fr; }
+  .cons-item { grid-template-columns: 1fr 1fr; }
+  .cons-header { display: none; }
+  .pkg-btn { padding: 10px 8px; font-size: 11px; }
+  #compare-cards-wrapper { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="brand">
+      <div class="logo">O</div>
+      <div class="brand-text">
+        <h1>Orbital ADD</h1>
+        <p>Calculadora · <span id="hdr-paquete">Paquete Estándar</span></p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="exportData()" title="Exportar">⬇</button>
+      <button class="btn-icon" onclick="importData()" title="Importar">⬆</button>
+      <button class="btn-icon" onclick="confirmReset()" title="Reset">↺</button>
+    </div>
+  </header>
+
+  <div class="package-selector">
+    <button class="pkg-btn estandar active" data-pkg="estandar" onclick="setPackage('estandar', this)">
+      <span class="pkg-name">Estándar</span>
+      <span class="pkg-model">FMC130</span>
+    </button>
+    <button class="pkg-btn profesional" data-pkg="profesional" onclick="setPackage('profesional', this)">
+      <span class="pkg-name">Profesional</span>
+      <span class="pkg-model">FMC125</span>
+    </button>
+    <button class="pkg-btn custom" data-pkg="custom" onclick="setPackage('custom', this)">
+      <span class="pkg-name">Personalizado</span>
+      <span class="pkg-model">Custom</span>
+    </button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" onclick="showTab('dashboard', this)">Dashboard</button>
+    <button class="tab" onclick="showTab('costos', this)">Costos</button>
+    <button class="tab" onclick="showTab('consumibles', this)">Consumibles</button>
+    <button class="tab" onclick="showTab('pl', this)">P&L</button>
+    <button class="tab" onclick="showTab('sensibilidad', this)">Sensibilidad</button>
+    <button class="tab" onclick="showTab('comparar', this)">Comparar</button>
+  </nav>
+
+  <div class="panel active" id="panel-dashboard">
+
+    <div class="section">
+      <h2><span class="icon">📍</span> Zona de Instalación</h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Aplica a todos los paquetes</p>
+      <div class="zone-grid">
+        <div class="zone-card active" data-zone="1" onclick="setZone(1, this)"><div class="zone-label">Zona 1</div><div class="zone-value" id="zone1-total">$200</div><div class="zone-name">Puebla Local</div></div>
+        <div class="zone-card" data-zone="2" onclick="setZone(2, this)"><div class="zone-label">Zona 2</div><div class="zone-value" id="zone2-total">$600</div><div class="zone-name">Interior Puebla</div></div>
+        <div class="zone-card" data-zone="3" onclick="setZone(3, this)"><div class="zone-label">Zona 3</div><div class="zone-value" id="zone3-total">$1,300</div><div class="zone-name">Foránea</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">💰</span> Precios <span id="status-margen" class="status-badge good">Saludable</span></h2>
+      <div class="input-row">
+        <div class="input-label">Precio kit + instalación (sin IVA)<span class="hint" id="precio-venta-coniva">Con IVA: $0</span></div>
+        <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="precio-venta" onchange="recalc()"></div>
+      </div>
+      <div class="input-row">
+        <div class="input-label">Mensualidad monitoreo (sin IVA)<span class="hint" id="precio-mensualidad-coniva">Con IVA: $0</span></div>
+        <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="precio-mensualidad" onchange="recalc()"></div>
+      </div>
+    </div>
+
+    <div class="kpi-section-title">Rentabilidad por Instalación</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <button class="btn-info" onclick="showInfo('mc')">i</button>
+        <div class="kpi-label">Margen de Contribución</div>
+        <div class="kpi-value accent" id="kpi-mc">$0</div>
+        <div class="kpi-sub" id="kpi-mc-pct">0%</div>
+      </div>
+      <div class="kpi-card highlight">
+        <button class="btn-info" onclick="showInfo('utilidad')">i</button>
+        <div class="kpi-label">Utilidad por Instalación</div>
+        <div class="kpi-value positive" id="kpi-utilidad">$0</div>
+        <div class="kpi-sub" id="kpi-utilidad-pct">0%</div>
+      </div>
+      <div class="kpi-card">
+        <button class="btn-info" onclick="showInfo('cvt')">i</button>
+        <div class="kpi-label">Costo Total Variable</div>
+        <div class="kpi-value" id="kpi-cvt">$0</div>
+        <div class="kpi-sub">Por instalación</div>
+      </div>
+    </div>
+
+    <div class="kpi-section-title">Ingreso Recurrente</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <button class="btn-info" onclick="showInfo('recurrente')">i</button>
+        <div class="kpi-label">Margen Recurrente/mes</div>
+        <div class="kpi-value positive" id="kpi-recurrente">$0</div>
+        <div class="kpi-sub">Después de ISR</div>
+      </div>
+    </div>
+
+    <div class="kpi-section-title purple">Métricas a Largo Plazo</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <button class="btn-info" onclick="showInfo('ltv')">i</button>
+        <div class="kpi-label">LTV 12 meses</div>
+        <div class="kpi-value accent" id="kpi-ltv">$0</div>
+        <div class="kpi-sub">Valor de vida del cliente</div>
+      </div>
+      <div class="kpi-card">
+        <button class="btn-info" onclick="showInfo('pe')">i</button>
+        <div class="kpi-label">Punto de Equilibrio</div>
+        <div class="kpi-value" id="kpi-pe">0</div>
+        <div class="kpi-sub">Clientes mínimos</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel" id="panel-costos">
+    <div class="section fiscal-shared">
+      <h2><span class="icon">⚙</span> Configuración Fiscal <span class="shared-tag">Compartido</span></h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Aplica a TODOS los paquetes</p>
+      <div class="input-row"><div class="input-label">Régimen fiscal</div><div class="input-field"><select id="regimen" onchange="recalc()"><option value="resico_pf">RESICO PF</option><option value="resico_pm">RESICO PM</option><option value="activ_emp">Actividad Empresarial</option></select></div></div>
+      <div class="input-row"><div class="input-label">Factura con IVA<span class="hint">IVA acreditable si facturas</span></div><div class="input-field"><div class="toggle-group"><button class="toggle-btn active" data-iva="1" onclick="toggleIva(1, this)">Sí</button><button class="toggle-btn" data-iva="0" onclick="toggleIva(0, this)">No</button></div></div></div>
+      <div class="input-row"><div class="input-label">Ingreso bruto mensual estimado</div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="ingreso-mensual" onchange="recalc()"></div></div>
+      <div class="input-row"><div class="input-label">Tasa ISR (auto)</div><div class="input-field"><input type="text" id="tasa-isr-display" readonly style="color:var(--green);"></div></div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">🔧</span> Componentes del Paquete <span id="pkg-tag-comp" class="pkg-tag estandar">Estándar</span></h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;">Precios con IVA. Agrega o quita lo que necesites.</p>
+      <div id="componentes-list" class="comp-list"></div>
+      <button class="btn-add" onclick="addComponente()">+ Agregar componente</button>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">👷</span> Mano de Obra <span id="pkg-tag-mo" class="pkg-tag estandar">Estándar</span></h2>
+      <div class="input-row"><div class="input-label">Horas de instalación<span class="hint">El Pro suele tomar más</span></div><div class="input-field"><input type="number" id="horas-mo" step="0.5" onchange="recalc()"></div></div>
+      <div class="input-row"><div class="input-label">Tarifa por hora<span class="hint">Costo de reemplazo de mercado</span></div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="tarifa-hora" onchange="recalc()"></div></div>
+    </div>
+
+    <div class="section fiscal-shared">
+      <h2><span class="icon">🚗</span> Logística por Zona <span class="shared-tag">Compartido</span></h2>
+      <div style="border-bottom:1px solid var(--border); padding:14px 0;">
+        <div style="font-weight:600; margin-bottom:10px;">Zona 1 · Puebla Local</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z1-gas" placeholder="Gasolina" onchange="recalc()"></div>
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z1-caseta" placeholder="Casetas" onchange="recalc()"></div>
+        </div>
+      </div>
+      <div style="border-bottom:1px solid var(--border); padding:14px 0;">
+        <div style="font-weight:600; margin-bottom:10px;">Zona 2 · Interior Puebla</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z2-gas" placeholder="Gasolina" onchange="recalc()"></div>
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z2-caseta" placeholder="Casetas" onchange="recalc()"></div>
+        </div>
+      </div>
+      <div style="padding:14px 0;">
+        <div style="font-weight:600; margin-bottom:10px;">Zona 3 · Foránea</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z3-gas" placeholder="Gasolina" onchange="recalc()"></div>
+          <div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="z3-caseta" placeholder="Casetas" onchange="recalc()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">📡</span> Costos Recurrentes <span id="pkg-tag-rec" class="pkg-tag estandar">Estándar</span></h2>
+      <div class="input-row"><div class="input-label">Datos SIM (mensual con IVA)<span class="hint">El Pro puede consumir más</span></div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="costo-datos" onchange="recalc()"></div></div>
+      <div class="input-row"><div class="input-label">VM / Servidor (anual)<span class="shared-tag" style="margin-left:6px;">Compartido</span></div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="costo-vm" onchange="recalc()"></div></div>
+      <div class="input-row"><div class="input-label">Dominio (anual)<span class="shared-tag" style="margin-left:6px;">Compartido</span></div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="costo-dominio" onchange="recalc()"></div></div>
+      <div class="input-row"><div class="input-label">Clientes activos totales<span class="shared-tag" style="margin-left:6px;">Compartido</span></div><div class="input-field"><input type="number" id="clientes-activos" onchange="recalc()"></div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-consumibles">
+    <div class="section">
+      <h2><span class="icon">📦</span> Costeo Híbrido <span id="pkg-tag-cons" class="pkg-tag estandar">Estándar</span></h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Cada paquete tiene su propio histórico. El Pro suele consumir más material.</p>
+      <div class="input-row"><div class="input-label">Estimado por instalación<span class="hint">Lo que usas para cotizar HOY</span></div><div class="input-field with-prefix"><span class="prefix">$</span><input type="number" id="consumibles-estimado" onchange="recalc()"></div></div>
+      <div class="stat-callout"><div><div class="label">Promedio Real (auto)</div><div style="font-size:11px; color:var(--text-dim); margin-top:4px;">Del histórico mensual</div></div><div class="value" id="consumibles-real">$0</div></div>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">📊</span> Histórico Mensual</h2>
+      <div class="cons-header"><div>Mes</div><div>Compras ($)</div><div>Instalaciones</div><div>$/Instalación</div><div></div></div>
+      <div id="historico-list" class="comp-list"></div>
+      <button class="btn-add" onclick="addMonth()">+ Agregar mes</button>
+    </div>
+
+    <div class="section">
+      <h2><span class="icon">💡</span> Valor Aplicado al P&L</h2>
+      <div class="stat-callout"><div><div class="label">Consumibles en cálculos</div><div style="font-size:11px; color:var(--text-dim); margin-top:4px;">Real si hay histórico, estimado si no</div></div><div class="value" id="consumibles-aplicado">$0</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-pl">
+    <div class="section">
+      <h2><span class="icon">📋</span> Estado de Resultados</h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:12px;"><span id="pl-paquete-label" class="pkg-tag estandar">Estándar</span> · Zona: <span id="pl-zona" style="color:var(--cyan); font-weight:700;">Puebla Local</span></p>
+      <table class="pl-table"><tbody id="pl-body"></tbody></table>
+    </div>
+    <div class="section">
+      <h2><span class="icon">🔁</span> Recurrente Mensual</h2>
+      <table class="pl-table"><tbody id="recurrente-body"></tbody></table>
+    </div>
+    <div class="section">
+      <h2><span class="icon">💎</span> Valor de Vida del Cliente</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">LTV 12 meses</div><div class="kpi-value accent" id="ltv-12">$0</div></div>
+        <div class="kpi-card"><div class="kpi-label">LTV 24 meses</div><div class="kpi-value accent" id="ltv-24">$0</div></div>
+        <div class="kpi-card"><div class="kpi-label">LTV 36 meses</div><div class="kpi-value accent" id="ltv-36">$0</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-sensibilidad">
+    <div class="section">
+      <h2><span class="icon">📈</span> Sensibilidad de Precio</h2>
+      <table class="sens-table"><thead><tr><th>Precio</th><th>Margen</th><th>%</th><th>Utilidad</th></tr></thead><tbody id="sens-precio-body"></tbody></table>
+    </div>
+    <div class="section">
+      <h2><span class="icon">📊</span> Sensibilidad de Mensualidad</h2>
+      <table class="sens-table"><thead><tr><th>Mensualidad</th><th>Margen</th><th>%</th><th>Utilidad/año</th></tr></thead><tbody id="sens-mens-body"></tbody></table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-comparar">
+    <div class="section">
+      <h2><span class="icon">⚖</span> Comparativo de Paquetes</h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Comparación lado a lado de tus 3 paquetes</p>
+      <div id="compare-cards-wrapper" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;"></div>
+    </div>
+  </div>
+
+  <div class="footer">Orbital ADD · <span>Calculadora v2.0 · Multi-paquete</span> · Datos guardados localmente</div>
+</div>
+
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal">
+    <h3 id="modal-title">Confirmar</h3>
+    <p id="modal-message">¿Estás seguro?</p>
+    <div class="modal-actions"><button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" id="modal-confirm-btn">Confirmar</button></div>
+  </div>
+</div>
+
+<!-- Modal de información de fórmulas -->
+<div class="info-modal" id="info-modal" onclick="if(event.target===this) closeInfoModal()">
+  <div class="info-modal-content">
+    <div class="info-modal-header">
+      <div class="info-modal-title" id="info-modal-title">Información</div>
+      <button class="info-modal-close" onclick="closeInfoModal()">✕</button>
+    </div>
+    <div id="info-modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Guardado</div>
+
+<script>
+function pkgDefaults(tipo) {
+  if (tipo === 'estandar') return {
+    componentes: [
+      {nombre: 'GPS FMC130', costo: 1282},
+      {nombre: 'Relevador', costo: 20},
+      {nombre: 'Botón SOS', costo: 40},
+      {nombre: 'Fusible y portafusible', costo: 15},
+      {nombre: 'SIM', costo: 0},
+    ],
+    horas_mo: 2, tarifa_hora: 200, costo_datos: 50,
+    precio_venta: 4500, precio_mensualidad: 450,
+    consumibles_estimado: 80,
+    historico: [{mes: 'Mes 1', compras: 0, instalaciones: 0}],
+  };
+  if (tipo === 'profesional') return {
+    componentes: [
+      {nombre: 'GPS FMC125', costo: 1850},
+      {nombre: 'Relevador', costo: 20},
+      {nombre: 'Botón SOS', costo: 40},
+      {nombre: 'Fusible y portafusible', costo: 15},
+      {nombre: 'SIM principal', costo: 0},
+      {nombre: 'SIM secundaria (dual)', costo: 0},
+      {nombre: 'Sensor combustible (Escort TD-600)', costo: 4500},
+      {nombre: 'Lector RFID', costo: 1200},
+      {nombre: 'Sensor temperatura', costo: 600},
+    ],
+    horas_mo: 4, tarifa_hora: 200, costo_datos: 90,
+    precio_venta: 12500, precio_mensualidad: 750,
+    consumibles_estimado: 150,
+    historico: [{mes: 'Mes 1', compras: 0, instalaciones: 0}],
+  };
+  return {
+    componentes: [{nombre: 'Componente 1', costo: 0}],
+    horas_mo: 2, tarifa_hora: 200, costo_datos: 50,
+    precio_venta: 0, precio_mensualidad: 0,
+    consumibles_estimado: 80,
+    historico: [{mes: 'Mes 1', compras: 0, instalaciones: 0}],
+  };
+}
+
+const DEFAULT_STATE = {
+  paquete_activo: 'estandar', regimen: 'resico_pf', factura_iva: 1,
+  ingreso_mensual: 25000, iva: 0.16,
+  z1_gas: 200, z1_caseta: 0, z2_gas: 500, z2_caseta: 100, z3_gas: 750, z3_caseta: 550,
+  zona_activa: 1, costo_vm: 3600, costo_dominio: 250, clientes_activos: 5,
+  paquetes: {
+    estandar: pkgDefaults('estandar'),
+    profesional: pkgDefaults('profesional'),
+    custom: pkgDefaults('custom'),
+  }
+};
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('orbital_state_v2');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const merged = {...JSON.parse(JSON.stringify(DEFAULT_STATE)), ...parsed};
+      if (!merged.paquetes) merged.paquetes = DEFAULT_STATE.paquetes;
+      ['estandar', 'profesional', 'custom'].forEach(k => { if (!merged.paquetes[k]) merged.paquetes[k] = pkgDefaults(k); });
+      return merged;
+    }
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+
+function saveState() { localStorage.setItem('orbital_state_v2', JSON.stringify(state)); }
+
+function fmt(n) {
+  if (n === null || n === undefined || isNaN(n)) return '$0';
+  const sign = n < 0 ? '-' : '';
+  return sign + '$' + Math.abs(n).toLocaleString('es-MX', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+function pct(n) { if (n === null || n === undefined || isNaN(n)) return '0.0%'; return (n * 100).toFixed(1) + '%'; }
+function calcTasaISR(ingreso) {
+  if (ingreso <= 25000) return 0.01;
+  if (ingreso <= 50000) return 0.011;
+  if (ingreso <= 83333.33) return 0.015;
+  if (ingreso <= 208333.33) return 0.02;
+  return 0.025;
+}
+function sinIVA(monto, fi, iva) { return fi === 1 ? monto / (1 + iva) : monto; }
+function pkgLabel(p) { if (p === 'estandar') return 'Estándar'; if (p === 'profesional') return 'Profesional'; return 'Personalizado'; }
+function getPkg() { return state.paquetes[state.paquete_activo]; }
+
+function setPackage(name, btn) {
+  state.paquete_activo = name;
+  document.querySelectorAll('.pkg-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pkg-tag').forEach(t => {
+    if (!t.id.startsWith('pl')) { t.className = 'pkg-tag ' + name; t.textContent = pkgLabel(name); }
+  });
+  document.getElementById('hdr-paquete').textContent = 'Paquete ' + pkgLabel(name);
+  initInputs();
+}
+
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  if (name === 'comparar') renderComparativo();
+}
+
+function toggleIva(val, btn) {
+  state.factura_iva = val;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  recalc();
+}
+
+function setZone(z, card) {
+  state.zona_activa = z;
+  document.querySelectorAll('.zone-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  recalc();
+}
+
+function renderComponentes() {
+  const pkg = getPkg();
+  const container = document.getElementById('componentes-list');
+  container.innerHTML = '';
+  pkg.componentes.forEach((c, idx) => {
+    const div = document.createElement('div');
+    div.className = 'comp-item';
+    div.innerHTML = '<input type="text" value="' + c.nombre.replace(/"/g, '&quot;') + '" placeholder="Nombre" onchange="updateComponente(' + idx + ', \'nombre\', this.value)">' +
+      '<div class="input-field with-prefix"><span class="prefix">$</span><input type="number" value="' + c.costo + '" onchange="updateComponente(' + idx + ', \'costo\', parseFloat(this.value) || 0)"></div>' +
+      '<button class="btn-delete" onclick="removeComponente(' + idx + ')">✕</button>';
+    container.appendChild(div);
+  });
+}
+
+function updateComponente(idx, field, value) { getPkg().componentes[idx][field] = value; recalc(); }
+function addComponente() { getPkg().componentes.push({nombre: 'Nuevo componente', costo: 0}); renderComponentes(); recalc(); }
+function removeComponente(idx) {
+  getPkg().componentes.splice(idx, 1);
+  if (getPkg().componentes.length === 0) getPkg().componentes.push({nombre: 'Componente 1', costo: 0});
+  renderComponentes(); recalc();
+}
+
+function renderHistorico() {
+  const pkg = getPkg();
+  const container = document.getElementById('historico-list');
+  container.innerHTML = '';
+  pkg.historico.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'cons-item';
+    const costoUnit = item.instalaciones > 0 ? item.compras / item.instalaciones : 0;
+    div.innerHTML = '<input type="text" value="' + item.mes + '" onchange="updateHistorico(' + idx + ', \'mes\', this.value)">' +
+      '<input type="number" value="' + item.compras + '" onchange="updateHistorico(' + idx + ', \'compras\', parseFloat(this.value) || 0)" placeholder="0">' +
+      '<input type="number" value="' + item.instalaciones + '" onchange="updateHistorico(' + idx + ', \'instalaciones\', parseFloat(this.value) || 0)" placeholder="0">' +
+      '<input type="text" value="' + fmt(costoUnit) + '" readonly style="color:var(--green);">' +
+      '<button class="btn-delete" onclick="removeMonth(' + idx + ')">✕</button>';
+    container.appendChild(div);
+  });
+}
+
+function updateHistorico(idx, field, value) { getPkg().historico[idx][field] = value; recalc(); }
+function addMonth() {
+  const pkg = getPkg();
+  pkg.historico.push({mes: 'Mes ' + (pkg.historico.length + 1), compras: 0, instalaciones: 0});
+  renderHistorico(); recalc();
+}
+function removeMonth(idx) {
+  const pkg = getPkg();
+  pkg.historico.splice(idx, 1);
+  if (pkg.historico.length === 0) pkg.historico.push({mes: 'Mes 1', compras: 0, instalaciones: 0});
+  renderHistorico(); recalc();
+}
+
+function calcPaquete(pkg) {
+  const tasa = calcTasaISR(state.ingreso_mensual);
+  const iva = state.iva;
+  const fi = state.factura_iva;
+  const z1 = state.z1_gas + state.z1_caseta;
+  const z2 = state.z2_gas + state.z2_caseta;
+  const z3 = state.z3_gas + state.z3_caseta;
+  const logistica = state.zona_activa === 1 ? z1 : state.zona_activa === 2 ? z2 : z3;
+  const totalCompras = pkg.historico.reduce((s, m) => s + (parseFloat(m.compras) || 0), 0);
+  const totalInst = pkg.historico.reduce((s, m) => s + (parseFloat(m.instalaciones) || 0), 0);
+  const consumibles_real = totalInst > 0 ? totalCompras / totalInst : 0;
+  const consumibles_aplicado = consumibles_real > 0 ? consumibles_real : pkg.consumibles_estimado;
+  const componentes_sin_iva = pkg.componentes.map(c => ({nombre: c.nombre, valor: sinIVA(c.costo, fi, iva), valorConIva: c.costo}));
+  const c_componentes = componentes_sin_iva.reduce((s, c) => s + c.valor, 0);
+  const c_componentes_con_iva = pkg.componentes.reduce((s, c) => s + c.costo, 0);
+  const c_consum = sinIVA(consumibles_aplicado, fi, iva);
+  const c_consum_con_iva = consumibles_aplicado;
+  const c_mo = pkg.horas_mo * pkg.tarifa_hora;
+  const c_mo_con_iva = c_mo; // MO no tiene IVA
+  const c_log = sinIVA(logistica, fi, iva);
+  const c_log_con_iva = logistica;
+  const cvt = c_componentes + c_consum + c_mo + c_log;
+  const cvt_con_iva = c_componentes_con_iva + c_consum_con_iva + c_mo_con_iva + c_log_con_iva;
+  const ingreso = pkg.precio_venta;
+  const mc = ingreso - cvt;
+  const isr = ingreso * tasa;
+  const utilidad = mc - isr;
+  const pct_mc = ingreso > 0 ? mc / ingreso : 0;
+  const pct_util = ingreso > 0 ? utilidad / ingreso : 0;
+  const ingreso_con_iva = ingreso * (1 + iva);
+  const rec_ingreso = pkg.precio_mensualidad;
+  const rec_ingreso_con_iva = rec_ingreso * (1 + iva);
+  const rec_datos = sinIVA(pkg.costo_datos, fi, iva);
+  const rec_datos_con_iva = pkg.costo_datos;
+  const overhead_anual = sinIVA(state.costo_vm + state.costo_dominio, fi, iva);
+  const overhead_anual_con_iva = state.costo_vm + state.costo_dominio;
+  const overhead_mensual = overhead_anual / 12;
+  const overhead_mensual_con_iva = overhead_anual_con_iva / 12;
+  const overhead_por_cliente = state.clientes_activos > 0 ? overhead_mensual / state.clientes_activos : 0;
+  const overhead_por_cliente_con_iva = state.clientes_activos > 0 ? overhead_mensual_con_iva / state.clientes_activos : 0;
+  const rec_cvt = rec_datos + overhead_por_cliente;
+  const rec_cvt_con_iva = rec_datos_con_iva + overhead_por_cliente_con_iva;
+  const rec_mc = rec_ingreso - rec_cvt;
+  const rec_isr = rec_ingreso * tasa;
+  const rec_utilidad = rec_mc - rec_isr;
+  return {
+    tasa, logistica, consumibles_real, consumibles_aplicado, iva, fi,
+    componentes_sin_iva, c_componentes, c_consum, c_mo, c_log,
+    c_componentes_con_iva, c_consum_con_iva, c_mo_con_iva, c_log_con_iva, cvt_con_iva,
+    cvt, ingreso, ingreso_con_iva, mc, isr, utilidad, pct_mc, pct_util,
+    rec_ingreso, rec_ingreso_con_iva, rec_datos, rec_datos_con_iva,
+    overhead_por_cliente, overhead_por_cliente_con_iva,
+    rec_cvt, rec_cvt_con_iva, rec_mc, rec_isr, rec_utilidad, overhead_mensual,
+    ltv12: utilidad + rec_utilidad * 12,
+    ltv24: utilidad + rec_utilidad * 24,
+    ltv36: utilidad + rec_utilidad * 36,
+    pe: rec_mc > 0 ? Math.ceil(overhead_mensual / rec_mc) : 0,
+  };
+}
+
+function recalc() {
+  state.regimen = document.getElementById('regimen').value;
+  state.ingreso_mensual = parseFloat(document.getElementById('ingreso-mensual').value) || 0;
+  state.z1_gas = parseFloat(document.getElementById('z1-gas').value) || 0;
+  state.z1_caseta = parseFloat(document.getElementById('z1-caseta').value) || 0;
+  state.z2_gas = parseFloat(document.getElementById('z2-gas').value) || 0;
+  state.z2_caseta = parseFloat(document.getElementById('z2-caseta').value) || 0;
+  state.z3_gas = parseFloat(document.getElementById('z3-gas').value) || 0;
+  state.z3_caseta = parseFloat(document.getElementById('z3-caseta').value) || 0;
+  state.costo_vm = parseFloat(document.getElementById('costo-vm').value) || 0;
+  state.costo_dominio = parseFloat(document.getElementById('costo-dominio').value) || 0;
+  state.clientes_activos = parseFloat(document.getElementById('clientes-activos').value) || 0;
+
+  const pkg = getPkg();
+  pkg.precio_venta = parseFloat(document.getElementById('precio-venta').value) || 0;
+  pkg.precio_mensualidad = parseFloat(document.getElementById('precio-mensualidad').value) || 0;
+  pkg.horas_mo = parseFloat(document.getElementById('horas-mo').value) || 0;
+  pkg.tarifa_hora = parseFloat(document.getElementById('tarifa-hora').value) || 0;
+  pkg.costo_datos = parseFloat(document.getElementById('costo-datos').value) || 0;
+  pkg.consumibles_estimado = parseFloat(document.getElementById('consumibles-estimado').value) || 0;
+
+  const tasa = calcTasaISR(state.ingreso_mensual);
+  document.getElementById('tasa-isr-display').value = pct(tasa);
+  document.getElementById('zone1-total').textContent = fmt(state.z1_gas + state.z1_caseta);
+  document.getElementById('zone2-total').textContent = fmt(state.z2_gas + state.z2_caseta);
+  document.getElementById('zone3-total').textContent = fmt(state.z3_gas + state.z3_caseta);
+  const zona_nombres = {1: 'Puebla Local', 2: 'Interior Puebla', 3: 'Foránea'};
+  document.getElementById('pl-zona').textContent = zona_nombres[state.zona_activa];
+
+  const r = calcPaquete(pkg);
+  document.getElementById('consumibles-real').textContent = fmt(r.consumibles_real);
+  document.getElementById('consumibles-aplicado').textContent = fmt(r.consumibles_aplicado);
+  document.getElementById('kpi-utilidad').textContent = fmt(r.utilidad);
+  document.getElementById('kpi-utilidad-pct').textContent = pct(r.pct_util) + ' neto';
+  document.getElementById('kpi-mc').textContent = fmt(r.mc);
+  document.getElementById('kpi-mc-pct').textContent = pct(r.pct_mc);
+  document.getElementById('kpi-recurrente').textContent = fmt(r.rec_utilidad);
+  document.getElementById('kpi-ltv').textContent = fmt(r.ltv12);
+  document.getElementById('kpi-pe').textContent = r.pe;
+  document.getElementById('kpi-cvt').textContent = fmt(r.cvt);
+  
+  // Mostrar precios con IVA en hints
+  const precioConIva = pkg.precio_venta * (1 + state.iva);
+  const mensConIva = pkg.precio_mensualidad * (1 + state.iva);
+  document.getElementById('precio-venta-coniva').textContent = 'Con IVA (' + (state.iva * 100).toFixed(0) + '%): ' + fmt(precioConIva);
+  document.getElementById('precio-mensualidad-coniva').textContent = 'Con IVA (' + (state.iva * 100).toFixed(0) + '%): ' + fmt(mensConIva);
+  
+  // Guardar resultados globalmente para los modales info
+  window._lastCalc = r;
+
+  const badge = document.getElementById('status-margen');
+  if (r.pct_mc >= 0.55) { badge.className = 'status-badge good'; badge.textContent = 'Excelente'; }
+  else if (r.pct_mc >= 0.40) { badge.className = 'status-badge good'; badge.textContent = 'Saludable'; }
+  else if (r.pct_mc >= 0.25) { badge.className = 'status-badge warn'; badge.textContent = 'Marginal'; }
+  else { badge.className = 'status-badge bad'; badge.textContent = 'Crítico'; }
+
+  // Helper para fila del P&L con 2 columnas IVA + botón info
+  function plRow(concepto, conIva, sinIva, infoKey, opts) {
+    opts = opts || {};
+    const cls = opts.cls || '';
+    const colorVal = opts.color || '';
+    const sufijo = opts.sufijo || '';
+    const infoBtn = infoKey ? '<button class="pl-info-btn" onclick="showPLInfo(\'' + infoKey + '\')">i</button>' : '';
+    return '<tr class="' + cls + '">' +
+      '<td>' + concepto + '</td>' +
+      '<td style="' + colorVal + '">' + (conIva !== null ? fmt(conIva) : '—') + '</td>' +
+      '<td style="' + colorVal + '">' + (sinIva !== null ? fmt(sinIva) : '—') + sufijo + '</td>' +
+      '<td style="width:36px; text-align:center;">' + infoBtn + '</td>' +
+    '</tr>';
+  }
+  
+  let plRows = '<tr class="pl-header-row"><td></td><td>Con IVA</td><td>Sin IVA</td><td></td></tr>';
+  plRows += '<tr class="section-row"><td colspan="4">Ingresos</td></tr>';
+  plRows += plRow('Precio de venta', r.ingreso_con_iva, r.ingreso, 'pl_ingreso');
+  plRows += '<tr class="section-row"><td colspan="4">Costos Variables</td></tr>';
+  
+  r.componentes_sin_iva.forEach(function(c, idx) {
+    plRows += plRow(c.nombre, c.valorConIva, c.valor, 'pl_comp_' + idx);
+  });
+  plRows += plRow('Consumibles (cable, cinta, etc.)', r.c_consum_con_iva, r.c_consum, 'pl_consum');
+  plRows += plRow('Mano de obra', r.c_mo_con_iva, r.c_mo, 'pl_mo');
+  plRows += plRow('Logística (' + zona_nombres[state.zona_activa] + ')', r.c_log_con_iva, r.c_log, 'pl_log');
+  plRows += plRow('Total Costos Variables', r.cvt_con_iva, r.cvt, 'pl_cvt', {cls: 'subtotal-row'});
+  plRows += plRow('Margen de Contribución', null, r.mc, 'pl_mc', {cls: 'subtotal-row', color: 'color:var(--green); background:var(--green-soft);', sufijo: ' · ' + pct(r.pct_mc)});
+  plRows += plRow('ISR ' + pct(r.tasa), null, r.isr, 'pl_isr');
+  plRows += plRow('UTILIDAD NETA', null, r.utilidad, 'pl_utilidad', {cls: 'total-row', sufijo: ' · ' + pct(r.pct_util)});
+  
+  document.getElementById('pl-body').innerHTML = plRows;
+
+  const plLabel = document.getElementById('pl-paquete-label');
+  plLabel.className = 'pkg-tag ' + state.paquete_activo;
+  plLabel.textContent = pkgLabel(state.paquete_activo);
+
+  let recRows = '<tr class="pl-header-row"><td></td><td>Con IVA</td><td>Sin IVA</td><td></td></tr>';
+  recRows += '<tr class="section-row"><td colspan="4">Ingreso Mensual</td></tr>';
+  recRows += plRow('Mensualidad', r.rec_ingreso_con_iva, r.rec_ingreso, 'rec_ingreso');
+  recRows += '<tr class="section-row"><td colspan="4">Costos</td></tr>';
+  recRows += plRow('Datos SIM', r.rec_datos_con_iva, r.rec_datos, 'rec_datos');
+  recRows += plRow('Overhead por cliente (VM/dominio)', r.overhead_por_cliente_con_iva, r.overhead_por_cliente, 'rec_overhead');
+  recRows += plRow('Total Costos', r.rec_cvt_con_iva, r.rec_cvt, 'rec_cvt', {cls: 'subtotal-row'});
+  recRows += plRow('Margen Bruto', null, r.rec_mc, 'rec_mc', {cls: 'subtotal-row', color: 'color:var(--green); background:var(--green-soft);'});
+  recRows += plRow('ISR ' + pct(r.tasa), null, r.rec_isr, 'rec_isr');
+  recRows += plRow('UTILIDAD NETA / MES', null, r.rec_utilidad, 'rec_utilidad', {cls: 'total-row'});
+  
+  document.getElementById('recurrente-body').innerHTML = recRows;
+
+  document.getElementById('ltv-12').textContent = fmt(r.ltv12);
+  document.getElementById('ltv-24').textContent = fmt(r.ltv24);
+  document.getElementById('ltv-36').textContent = fmt(r.ltv36);
+
+  const precioBase = r.ingreso;
+  const precios_test = [
+    Math.round(precioBase * 0.75), Math.round(precioBase * 0.85), Math.round(precioBase * 0.95),
+    Math.round(precioBase), Math.round(precioBase * 1.05), Math.round(precioBase * 1.15), Math.round(precioBase * 1.25)
+  ];
+  let sensRows = '';
+  precios_test.forEach(p => {
+    const mc_t = p - r.cvt;
+    const pct_t = p > 0 ? mc_t / p : 0;
+    const util_t = mc_t - p * r.tasa;
+    sensRows += '<tr' + (Math.abs(p - precioBase) < 1 ? ' class="current"' : '') + '><td>' + fmt(p) + '</td><td>' + fmt(mc_t) + '</td><td>' + pct(pct_t) + '</td><td>' + fmt(util_t) + '</td></tr>';
+  });
+  document.getElementById('sens-precio-body').innerHTML = sensRows;
+
+  const mensBase = r.rec_ingreso;
+  const mens_test = [
+    Math.round(mensBase * 0.75), Math.round(mensBase * 0.85), Math.round(mensBase),
+    Math.round(mensBase * 1.10), Math.round(mensBase * 1.25), Math.round(mensBase * 1.5)
+  ];
+  let sensMensRows = '';
+  mens_test.forEach(m => {
+    const mc_t = m - r.rec_cvt;
+    const pct_t = m > 0 ? mc_t / m : 0;
+    const util_t = (mc_t - m * r.tasa) * 12;
+    sensMensRows += '<tr' + (Math.abs(m - mensBase) < 1 ? ' class="current"' : '') + '><td>' + fmt(m) + '</td><td>' + fmt(mc_t) + '</td><td>' + pct(pct_t) + '</td><td>' + fmt(util_t) + '</td></tr>';
+  });
+  document.getElementById('sens-mens-body').innerHTML = sensMensRows;
+
+  saveState();
+}
+
+function renderComparativo() {
+  const wrapper = document.getElementById('compare-cards-wrapper');
+  wrapper.innerHTML = '';
+  ['estandar', 'profesional', 'custom'].forEach(p => {
+    const pkg = state.paquetes[p];
+    const r = calcPaquete(pkg);
+    const div = document.createElement('div');
+    div.className = 'compare-card ' + p;
+    div.innerHTML = '<h4>Paquete ' + pkgLabel(p) + '</h4>' +
+      '<div class="compare-row"><span>Precio</span><span class="v">' + fmt(r.ingreso) + '</span></div>' +
+      '<div class="compare-row"><span>CVT</span><span class="v">' + fmt(r.cvt) + '</span></div>' +
+      '<div class="compare-row"><span>Margen Contrib.</span><span class="v" style="color:var(--green);">' + fmt(r.mc) + '</span></div>' +
+      '<div class="compare-row"><span>% Margen</span><span class="v" style="color:var(--green);">' + pct(r.pct_mc) + '</span></div>' +
+      '<div class="compare-row"><span>Utilidad Neta</span><span class="v" style="color:var(--green);">' + fmt(r.utilidad) + '</span></div>' +
+      '<div class="compare-row"><span>Mensualidad</span><span class="v">' + fmt(r.rec_ingreso) + '</span></div>' +
+      '<div class="compare-row"><span>Util. recurrente/mes</span><span class="v" style="color:var(--green);">' + fmt(r.rec_utilidad) + '</span></div>' +
+      '<div class="compare-row"><span>LTV 24m</span><span class="v" style="color:var(--cyan);">' + fmt(r.ltv24) + '</span></div>';
+    wrapper.appendChild(div);
+  });
+}
+
+function initInputs() {
+  const pkg = getPkg();
+  document.getElementById('precio-venta').value = pkg.precio_venta;
+  document.getElementById('precio-mensualidad').value = pkg.precio_mensualidad;
+  document.getElementById('horas-mo').value = pkg.horas_mo;
+  document.getElementById('tarifa-hora').value = pkg.tarifa_hora;
+  document.getElementById('costo-datos').value = pkg.costo_datos;
+  document.getElementById('consumibles-estimado').value = pkg.consumibles_estimado;
+  document.getElementById('regimen').value = state.regimen;
+  document.getElementById('ingreso-mensual').value = state.ingreso_mensual;
+  document.getElementById('z1-gas').value = state.z1_gas;
+  document.getElementById('z1-caseta').value = state.z1_caseta;
+  document.getElementById('z2-gas').value = state.z2_gas;
+  document.getElementById('z2-caseta').value = state.z2_caseta;
+  document.getElementById('z3-gas').value = state.z3_gas;
+  document.getElementById('z3-caseta').value = state.z3_caseta;
+  document.getElementById('costo-vm').value = state.costo_vm;
+  document.getElementById('costo-dominio').value = state.costo_dominio;
+  document.getElementById('clientes-activos').value = state.clientes_activos;
+  document.querySelectorAll('.toggle-btn').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.iva) === state.factura_iva); });
+  document.querySelectorAll('.zone-card').forEach(c => { c.classList.toggle('active', parseInt(c.dataset.zone) === state.zona_activa); });
+  document.querySelectorAll('.pkg-btn').forEach(b => { b.classList.toggle('active', b.dataset.pkg === state.paquete_activo); });
+  document.querySelectorAll('.pkg-tag').forEach(t => {
+    if (!t.id || !t.id.startsWith('pl')) { t.className = 'pkg-tag ' + state.paquete_activo; t.textContent = pkgLabel(state.paquete_activo); }
+  });
+  document.getElementById('hdr-paquete').textContent = 'Paquete ' + pkgLabel(state.paquete_activo);
+  renderComponentes();
+  renderHistorico();
+  recalc();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'orbital_respaldo_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Respaldo descargado');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const data = JSON.parse(ev.target.result);
+        state = {...JSON.parse(JSON.stringify(DEFAULT_STATE)), ...data};
+        if (!state.paquetes) state.paquetes = DEFAULT_STATE.paquetes;
+        saveState();
+        initInputs();
+        showToast('Datos importados');
+      } catch(err) { alert('Error al importar archivo'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function confirmReset() {
+  const modal = document.getElementById('modal-confirm');
+  document.getElementById('modal-title').textContent = 'Resetear datos';
+  document.getElementById('modal-message').textContent = '¿Borrar TODOS los datos de los 3 paquetes y volver a valores iniciales?';
+  document.getElementById('modal-confirm-btn').onclick = function() {
+    state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    saveState();
+    initInputs();
+    closeModal();
+    showToast('Datos reseteados');
+  };
+  modal.classList.add('active');
+}
+
+function closeModal() { document.getElementById('modal-confirm').classList.remove('active'); }
+
+function showInfo(type) {
+  const r = window._lastCalc;
+  if (!r) return;
+  const modal = document.getElementById('info-modal');
+  const titleEl = document.getElementById('info-modal-title');
+  const bodyEl = document.getElementById('info-modal-body');
+  
+  const info = getInfoContent(type, r);
+  titleEl.textContent = info.title;
+  bodyEl.innerHTML = info.body;
+  modal.classList.add('active');
+}
+
+function showPLInfo(key) {
+  const r = window._lastCalc;
+  if (!r) return;
+  const modal = document.getElementById('info-modal');
+  const titleEl = document.getElementById('info-modal-title');
+  const bodyEl = document.getElementById('info-modal-body');
+  
+  const info = getPLInfoContent(key, r);
+  titleEl.textContent = info.title;
+  bodyEl.innerHTML = info.body;
+  modal.classList.add('active');
+}
+
+function getPLInfoContent(key, r) {
+  const ivaPct = (r.iva * 100).toFixed(0);
+  const tasaIvaFmt = '1.' + ivaPct;
+  
+  // Helper para conversión IVA
+  function ivaExplain(label, conIva, sinIva, fueDividido) {
+    if (fueDividido) {
+      return '<div class="info-section">' +
+        '<h4>Conversión IVA</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Sin IVA</span> <span class="op">=</span> <span class="var">Con IVA</span> <span class="op">÷</span> ' + tasaIvaFmt + '</div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(conIva) + ' <span class="op">÷</span> ' + tasaIvaFmt + ' <span class="op">=</span> <span class="result">' + fmt(sinIva) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">IVA acreditable: ' + fmt(conIva - sinIva) + ' (lo que recuperas al facturar)</p>' +
+        '</div>';
+    }
+    return '<div class="info-section"><h4>Sin IVA</h4><p>Este concepto no tiene IVA. El valor es el mismo en ambas columnas.</p></div>';
+  }
+  
+  // Ingreso
+  if (key === 'pl_ingreso') {
+    return {
+      title: 'Precio de Venta',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es lo que cobras al cliente por la instalación. <b>Sin IVA</b> es tu ingreso real. <b>Con IVA</b> es lo que el cliente te transfiere (incluye el ' + ivaPct + '% que vas a entregar al SAT).</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Conversión IVA</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Con IVA</span> <span class="op">=</span> <span class="var">Sin IVA</span> <span class="op">×</span> ' + tasaIvaFmt + '</div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.ingreso) + ' <span class="op">×</span> ' + tasaIvaFmt + ' <span class="op">=</span> <span class="result">' + fmt(r.ingreso_con_iva) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">IVA cobrado al cliente: ' + fmt(r.ingreso_con_iva - r.ingreso) + ' (este dinero NO es tuyo, es del SAT)</p>' +
+        '</div>'
+    };
+  }
+  
+  // Componentes (comp_0, comp_1, etc)
+  if (key.startsWith('pl_comp_')) {
+    const idx = parseInt(key.replace('pl_comp_', ''));
+    const c = r.componentes_sin_iva[idx];
+    if (!c) return { title: 'Componente', body: '<p>No disponible.</p>' };
+    return {
+      title: c.nombre,
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Componente físico del paquete. El proveedor te lo cobra con IVA. Como tú facturas, ese IVA es <b>acreditable</b> (lo recuperas del SAT al final del mes), por eso tu costo real es el valor sin IVA.</p>' +
+        '</div>' +
+        ivaExplain(c.nombre, c.valorConIva, c.valor, true)
+    };
+  }
+  
+  if (key === 'pl_consum') {
+    return {
+      title: 'Consumibles',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Cable, cinta de aislar, amarres, termofit, fusibles pequeños y otros materiales que usas en cada instalación. Se prorratea por instalación (Standard Costing).</p>' +
+        '</div>' +
+        ivaExplain('Consumibles', r.c_consum_con_iva, r.c_consum, true)
+    };
+  }
+  
+  if (key === 'pl_mo') {
+    return {
+      title: 'Mano de Obra',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Tu tiempo o el de tu técnico instalando el equipo. Se calcula como <b>horas × tarifa por hora</b>.</p>' +
+        '<div class="info-formula" style="margin-top:8px;"><span class="result">' + fmt(r.c_mo) + '</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Sin IVA</h4>' +
+        '<p>La mano de obra propia NO tiene IVA porque no es una compra a proveedor. El valor es el mismo en ambas columnas.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'pl_log') {
+    return {
+      title: 'Logística',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Gasolina + casetas para llegar al lugar de instalación. Varía según la zona seleccionada (Local, Interior o Foránea).</p>' +
+        '</div>' +
+        ivaExplain('Logística', r.c_log_con_iva, r.c_log, true) +
+        '<div class="info-section">' +
+        '<p style="font-size:12px; color:var(--text-muted);"><b>Nota:</b> La gasolina sí tiene IVA acreditable con factura. Las casetas también, pero requieren CFDI específico con tu RFC para acreditar.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'pl_cvt') {
+    return {
+      title: 'Total Costos Variables',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>La suma de TODOS los costos directos de una instalación: componentes + consumibles + mano de obra + logística.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Cálculo</h4>' +
+        '<div class="info-formula">Componentes: ' + fmt(r.c_componentes) + '</div>' +
+        '<div class="info-formula" style="margin-top:4px;">Consumibles: ' + fmt(r.c_consum) + '</div>' +
+        '<div class="info-formula" style="margin-top:4px;">Mano de obra: ' + fmt(r.c_mo) + '</div>' +
+        '<div class="info-formula" style="margin-top:4px;">Logística: ' + fmt(r.c_log) + '</div>' +
+        '<div class="info-formula" style="margin-top:8px; background:var(--cyan-soft); border-color:var(--cyan);">TOTAL: <span class="result">' + fmt(r.cvt) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'pl_mc') {
+    return {
+      title: 'Margen de Contribución',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Lo que te queda después de cubrir todos los costos directos, <b>antes de impuestos</b>.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula</h4>' +
+        '<div class="info-formula text-formula"><span class="var">MC</span> <span class="op">=</span> <span class="var">Precio Venta</span> <span class="op">−</span> <span class="var">CVT</span></div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.ingreso) + ' <span class="op">−</span> ' + fmt(r.cvt) + ' <span class="op">=</span> <span class="result">' + fmt(r.mc) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Representa el ' + pct(r.pct_mc) + ' del precio de venta.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'pl_isr') {
+    return {
+      title: 'ISR (Impuesto Sobre la Renta)',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Impuesto al SAT sobre tus ingresos. En RESICO Persona Física se calcula como un porcentaje fijo sobre el ingreso bruto sin IVA, no sobre la utilidad.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Cálculo</h4>' +
+        '<div class="info-formula text-formula"><span class="var">ISR</span> <span class="op">=</span> <span class="var">Precio Venta</span> <span class="op">×</span> <span class="var">Tasa RESICO</span></div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.ingreso) + ' <span class="op">×</span> ' + pct(r.tasa) + ' <span class="op">=</span> <span class="result">' + fmt(r.isr) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'pl_utilidad') {
+    return {
+      title: 'Utilidad Neta',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>El dinero que realmente entra a tu bolsa después de absolutamente todo: costos directos y ISR.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Utilidad</span> <span class="op">=</span> <span class="var">MC</span> <span class="op">−</span> <span class="var">ISR</span></div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.mc) + ' <span class="op">−</span> ' + fmt(r.isr) + ' <span class="op">=</span> <span class="result">' + fmt(r.utilidad) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Representa el ' + pct(r.pct_util) + ' del precio de venta.</p>' +
+        '</div>'
+    };
+  }
+  
+  // Recurrente
+  if (key === 'rec_ingreso') {
+    return {
+      title: 'Mensualidad',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Lo que cobras al cliente cada mes por el servicio de monitoreo GPS. Sin IVA es tu ingreso real, con IVA es lo que el cliente transfiere.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Conversión IVA</h4>' +
+        '<div class="info-formula">' + fmt(r.rec_ingreso) + ' <span class="op">×</span> ' + tasaIvaFmt + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_ingreso_con_iva) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'rec_datos') {
+    return {
+      title: 'Datos SIM',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>El costo mensual del plan de datos de la SIM del cliente (Alai o Telcel). Como facturas, el IVA es acreditable.</p>' +
+        '</div>' +
+        ivaExplain('Datos SIM', r.rec_datos_con_iva, r.rec_datos, true)
+    };
+  }
+  
+  if (key === 'rec_overhead') {
+    return {
+      title: 'Overhead por Cliente',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>La parte proporcional que cada cliente activo debe "absorber" del costo del servidor (VM Traccar) y dominio. Se calcula dividiendo el costo total mensual entre el número de clientes activos.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Cálculo</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Overhead/cliente</span> <span class="op">=</span> (<span class="var">VM</span> <span class="op">+</span> <span class="var">Dominio</span>) <span class="op">÷</span> 12 <span class="op">÷</span> <span class="var">Clientes activos</span></div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.overhead_mensual) + ' <span class="op">÷</span> ' + state.clientes_activos + ' <span class="op">=</span> <span class="result">' + fmt(r.overhead_por_cliente) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Entre más clientes tengas, menor el overhead por cliente.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'rec_cvt') {
+    return {
+      title: 'Total Costos Recurrentes',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Suma de los costos mensuales por cliente activo: datos SIM + overhead.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<div class="info-formula">' + fmt(r.rec_datos) + ' <span class="op">+</span> ' + fmt(r.overhead_por_cliente) + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_cvt) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'rec_mc') {
+    return {
+      title: 'Margen Bruto Recurrente',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Lo que te queda al mes por cliente activo, antes de pagar ISR.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<div class="info-formula">' + fmt(r.rec_ingreso) + ' <span class="op">−</span> ' + fmt(r.rec_cvt) + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_mc) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'rec_isr') {
+    return {
+      title: 'ISR Mensual Recurrente',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>El ISR aplicado solo sobre la mensualidad cobrada.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<div class="info-formula">' + fmt(r.rec_ingreso) + ' <span class="op">×</span> ' + pct(r.tasa) + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_isr) + '</span></div>' +
+        '</div>'
+    };
+  }
+  
+  if (key === 'rec_utilidad') {
+    return {
+      title: 'Utilidad Neta Recurrente',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Lo que realmente ganas al mes por cada cliente activo, después de TODO.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<div class="info-formula">' + fmt(r.rec_mc) + ' <span class="op">−</span> ' + fmt(r.rec_isr) + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_utilidad) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Con 10 clientes activos ganarías ' + fmt(r.rec_utilidad * 10) + '/mes. Con 20 clientes: ' + fmt(r.rec_utilidad * 20) + '/mes.</p>' +
+        '</div>'
+    };
+  }
+  
+  return { title: 'Información', body: '<p>Sin información disponible.</p>' };
+}
+
+function closeInfoModal() { document.getElementById('info-modal').classList.remove('active'); }
+
+function getInfoContent(type, r) {
+  const isr_pct = pct(r.tasa);
+  
+  if (type === 'mc') {
+    return {
+      title: 'Margen de Contribución',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es lo que te queda de cada instalación <b>después de pagar todos los costos directos</b> (hardware, mano de obra, consumibles, logística) pero <b>antes de impuestos</b>. Es la métrica clave para decidir si un trabajo es rentable y hasta dónde puedes dar descuento.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Margen de Contribución</span> <span class="op">=</span> <span class="var">Precio de Venta</span> <span class="op">−</span> <span class="var">Costo Total Variable</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Con tus números actuales</h4>' +
+        '<div class="info-formula">' + fmt(r.ingreso) + ' <span class="op">−</span> ' + fmt(r.cvt) + ' <span class="op">=</span> <span class="result">' + fmt(r.mc) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Representa el ' + pct(r.pct_mc) + ' de tu precio de venta.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>De cada instalación que vendes, te quedan <b style="color:var(--cyan);">' + fmt(r.mc) + '</b> brutos. De ahí todavía hay que restar el ISR para saber tu utilidad neta real.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (type === 'utilidad') {
+    return {
+      title: 'Utilidad por Instalación',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es el dinero <b>que realmente entra a tu bolsa</b> por cada instalación, después de haber pagado todos los costos directos Y el ISR (Impuesto Sobre la Renta). Es la utilidad neta final.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Utilidad Neta</span> <span class="op">=</span> <span class="var">Margen de Contribución</span> <span class="op">−</span> <span class="var">ISR</span></div>' +
+        '<p style="margin-top:8px; font-size:12px; color:var(--text-muted);">Donde ISR = Precio de Venta × Tasa RESICO (' + isr_pct + ')</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Con tus números actuales</h4>' +
+        '<div class="info-formula">ISR: ' + fmt(r.ingreso) + ' <span class="op">×</span> ' + isr_pct + ' <span class="op">=</span> ' + fmt(r.isr) + '</div>' +
+        '<div class="info-formula" style="margin-top:8px;">' + fmt(r.mc) + ' <span class="op">−</span> ' + fmt(r.isr) + ' <span class="op">=</span> <span class="result">' + fmt(r.utilidad) + '</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">Representa el ' + pct(r.pct_util) + ' de tu precio de venta.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>Por cada instalación, tu utilidad real es <b style="color:var(--green);">' + fmt(r.utilidad) + '</b>. Este es el dinero limpio que puedes retirar o reinvertir.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (type === 'cvt') {
+    let desglose = '';
+    r.componentes_sin_iva.forEach(function(c) {
+      desglose += '<div class="info-formula" style="margin-top:6px;">' + c.nombre + ': <span class="result">' + fmt(c.valor) + '</span></div>';
+    });
+    desglose += '<div class="info-formula" style="margin-top:6px;">Consumibles: <span class="result">' + fmt(r.c_consum) + '</span></div>';
+    desglose += '<div class="info-formula" style="margin-top:6px;">Mano de obra: <span class="result">' + fmt(r.c_mo) + '</span></div>';
+    desglose += '<div class="info-formula" style="margin-top:6px;">Logística: <span class="result">' + fmt(r.c_log) + '</span></div>';
+    
+    return {
+      title: 'Costo Total Variable',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es la suma de <b>todos los costos directos</b> que tienes para hacer UNA instalación. Cambian directamente con cada venta: si vendes una más, este costo sube. Si no vendes, este costo es cero.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">CVT</span> <span class="op">=</span> <span class="var">Componentes</span> <span class="op">+</span> <span class="var">Consumibles</span> <span class="op">+</span> <span class="var">Mano de Obra</span> <span class="op">+</span> <span class="var">Logística</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Desglose con tus números</h4>' +
+        desglose +
+        '<div class="info-formula" style="margin-top:10px; background:var(--cyan-soft); border-color:var(--cyan);">TOTAL: <span class="result">' + fmt(r.cvt) + '</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>Cada instalación que haces te cuesta <b style="color:var(--cyan);">' + fmt(r.cvt) + '</b> en costos directos. Los precios ya están convertidos a valores sin IVA (porque facturas y acreditas IVA).</p>' +
+        '</div>'
+    };
+  }
+  
+  if (type === 'recurrente') {
+    return {
+      title: 'Margen Recurrente / Mes',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es la <b>utilidad neta mensual</b> que te genera CADA cliente activo por el servicio de monitoreo. Ya considera datos SIM, overhead de servidor/dominio y ISR. Es lo que multiplicado por tus clientes te da tu ingreso mensual estable.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Margen Recurrente</span> <span class="op">=</span> <span class="var">Mensualidad</span> <span class="op">−</span> <span class="var">Datos SIM</span> <span class="op">−</span> <span class="var">Overhead por cliente</span> <span class="op">−</span> <span class="var">ISR</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Con tus números actuales</h4>' +
+        '<div class="info-formula">' + fmt(r.rec_ingreso) + ' <span class="op">−</span> ' + fmt(r.rec_datos) + ' <span class="op">−</span> ' + fmt(r.overhead_por_cliente) + ' <span class="op">−</span> ' + fmt(r.rec_isr) + ' <span class="op">=</span> <span class="result">' + fmt(r.rec_utilidad) + '</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>Por cada cliente activo ganas <b style="color:var(--green);">' + fmt(r.rec_utilidad) + ' al mes</b> limpios. Si tuvieras 20 clientes activos, ganarías ' + fmt(r.rec_utilidad * 20) + ' al mes solo del monitoreo.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (type === 'ltv') {
+    return {
+      title: 'LTV (Lifetime Value) 12 meses',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>El <b>Valor de Vida del Cliente</b> es cuánto dinero TOTAL ganas de un cliente durante el primer año, sumando la instalación inicial más los 12 meses de monitoreo recurrente. Es la métrica clave para saber cuánto vale cada cliente que cierras.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">LTV 12m</span> <span class="op">=</span> <span class="var">Utilidad por Instalación</span> <span class="op">+</span> (<span class="var">Margen Recurrente</span> <span class="op">×</span> 12)</div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Con tus números actuales</h4>' +
+        '<div class="info-formula">' + fmt(r.utilidad) + ' <span class="op">+</span> (' + fmt(r.rec_utilidad) + ' <span class="op">×</span> 12)</div>' +
+        '<div class="info-formula" style="margin-top:6px;">' + fmt(r.utilidad) + ' <span class="op">+</span> ' + fmt(r.rec_utilidad * 12) + ' <span class="op">=</span> <span class="result">' + fmt(r.ltv12) + '</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>Cada cliente que cierras y mantienes un año te genera <b style="color:var(--cyan);">' + fmt(r.ltv12) + '</b> de utilidad total. Sirve para decidir cuánto gastar en marketing o referidos. Si cuesta $500 conseguir un cliente y vale ' + fmt(r.ltv12) + ', es una inversión obvia.</p>' +
+        '</div>'
+    };
+  }
+  
+  if (type === 'pe') {
+    return {
+      title: 'Punto de Equilibrio',
+      body: '<div class="info-section">' +
+        '<h4>¿Qué es?</h4>' +
+        '<p>Es la <b>cantidad mínima de clientes activos</b> que necesitas tener pagando mensualidad para cubrir tus costos fijos (servidor VM, dominio). A partir de ese número, todo cliente extra es ganancia neta.</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Fórmula general</h4>' +
+        '<div class="info-formula text-formula"><span class="var">Punto de Equilibrio</span> <span class="op">=</span> <span class="var">Costos Fijos Mensuales</span> <span class="op">÷</span> <span class="var">Margen Bruto Recurrente</span></div>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Con tus números actuales</h4>' +
+        '<div class="info-formula">' + fmt(r.overhead_mensual) + ' <span class="op">÷</span> ' + fmt(r.rec_mc) + ' <span class="op">=</span> <span class="result">' + r.pe + ' clientes</span></div>' +
+        '<p style="margin-top:8px; font-size:13px; color:var(--text-muted);">El resultado se redondea hacia arriba porque no puedes tener "medio cliente".</p>' +
+        '</div>' +
+        '<div class="info-section">' +
+        '<h4>Interpretación</h4>' +
+        '<p>Necesitas <b style="color:var(--yellow);">' + r.pe + ' clientes activos</b> pagando mensualidad solo para cubrir lo que pagas de servidor y dominio. Todo cliente arriba de ese número genera ganancia recurrente neta.</p>' +
+        '</div>'
+    };
+  }
+  
+  return { title: 'Información', body: '<p>Sin información disponible.</p>' };
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() { toast.classList.remove('show'); }, 2000);
+}
+
+initInputs();
+</script>
+</body>
+</html>
